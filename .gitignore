@@ -1,0 +1,38 @@
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Jupyter & Checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# macOS artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Large data files (Raw CSV files are large, keep them local)
+data/raw/*.csv
+*.csv
+
+# Model weights & large binaries
+models/*.pt
+models/*.bin
+models/*.safetensors
+models/*.pkl
+models/*.joblib
+
+# Logs and run files
+*.log
+.coverage
+htmlcov/

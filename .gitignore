@@ -22,8 +22,10 @@ ENV/
 ._*
 
 # Large data files (Raw CSV files are large, keep them local)
-data/raw/*.csv
-*.csv
+train.csv
+test.csv
+data/raw/
+!data/sample_*.csv
 
 # Model weights & large binaries
 models/*.pt

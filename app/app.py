@@ -1,6 +1,7 @@
 """
-Streamlit Web Application: Human vs. AI Text Detector
-Matches Section 8 of the NIT Sikkim Project Report.
+Streamlit Web Application: Human vs. AI Text Classification
+Department of Computer Science & Engineering, NIT Sikkim
+Authors: Pravesh Gedon Sharma (B240019) & Ankit Rawat (B320032)
 """
 
 import sys
@@ -16,21 +17,20 @@ from src.preprocessing import clean_text_for_tfidf
 from src.stylometrics import extract_stylometric_features
 
 st.set_page_config(
-    page_title="AI vs Human Text Detector",
-    page_icon="🤖",
+    page_title="AI vs Human Text Classification",
     layout="wide"
 )
 
-st.title("🤖 Classification of Human-Written vs. AI-Generated Text")
+st.title("Classification of Human-Written and AI-Generated Text")
 st.markdown("""
-**National Institute of Technology Sikkim** — Dept. of Computer Science & Engineering  
-*Project by Pravesh Gedon Sharma (B240019) & Ankit Rawat (B320032)*
+**National Institute of Technology Sikkim** — Department of Computer Science & Engineering  
+*Authors: Pravesh Gedon Sharma (B240019) & Ankit Rawat (B320032)*
 """)
 
 st.write("---")
 
 # Sidebar
-st.sidebar.header("⚙️ Configuration")
+st.sidebar.header("Model Selection")
 model_choice = st.sidebar.selectbox(
     "Select Classifier",
     ["Logistic Regression (Dual TF-IDF)", "Linear SVM (Calibrated)"]
@@ -60,16 +60,16 @@ artifacts = load_artifacts()
 col1, col2 = st.columns([3, 2])
 
 with col1:
-    st.subheader("📝 Input Passage")
+    st.subheader("Input Passage")
     user_text = st.text_area(
         "Enter text to classify:",
         height=280,
-        placeholder="Paste an essay, article, or generated text passage here..."
+        placeholder="Paste text passage here..."
     )
-    classify_btn = st.button("🚀 Classify Text", type="primary", use_container_width=True)
+    classify_btn = st.button("Classify Text", type="primary", use_container_width=True)
 
 with col2:
-    st.subheader("🔍 Analysis & Prediction")
+    st.subheader("Classification Results")
     if classify_btn:
         if not user_text.strip():
             st.warning("Please enter some text to classify.")
@@ -88,23 +88,23 @@ with col2:
                 prob_human = 1.0 - prob_ai
 
                 if prob_ai >= 0.5:
-                    st.error(f"### 🤖 Prediction: **AI-Generated**\n**Confidence: {prob_ai * 100:.1f}%**")
+                    st.error(f"### Predicted Class: **AI-Generated**\n**Confidence: {prob_ai * 100:.2f}%**")
                 else:
-                    st.success(f"### 👤 Prediction: **Human-Written**\n**Confidence: {prob_human * 100:.1f}%**")
+                    st.success(f"### Predicted Class: **Human-Written**\n**Confidence: {prob_human * 100:.2f}%**")
 
                 st.progress(prob_ai)
-                st.caption(f"AI Probability: {prob_ai:.3f} | Human Probability: {prob_human:.3f}")
+                st.caption(f"AI Probability: {prob_ai:.4f} | Human Probability: {prob_human:.4f}")
             else:
-                st.info("💡 Model checkpoints are not yet serialized into `models/`. Run Notebook 03 to export trained weights!")
+                st.info("Trained model files not found in models/ directory. Run notebook 03 to generate baseline weights.")
 
             # Stylometric Breakdown Cards
             st.write("---")
-            st.markdown("#### 📊 Stylometric Indicators")
+            st.markdown("#### Stylometric Summary")
             m1, m2 = st.columns(2)
             m1.metric("Word Count", f"{int(stylo['num_words'])}")
-            m1.metric("Sentence Burstiness (σ/μ)", f"{stylo['burstiness']:.2f}")
+            m1.metric("Sentence Burstiness (sigma / mu)", f"{stylo['burstiness']:.2f}")
             m1.metric("Flesch Reading Ease", f"{stylo['flesch_reading_ease']:.1f}")
 
             m2.metric("Lexical Diversity (TTR)", f"{stylo['ttr']:.2f}")
             m2.metric("Avg Sentence Length", f"{stylo['mean_sentence_length']:.1f}")
-            m2.metric("FKGL Grade Level", f"{stylo['flesch_kincaid_grade']:.1f}")
+            m2.metric("Flesch-Kincaid Grade", f"{stylo['flesch_kincaid_grade']:.1f}")

@@ -38,3 +38,11 @@ models/*.joblib
 *.log
 .coverage
 htmlcov/
+
+# Inference outputs (regenerable)
+test/results/
+test/results_svm/
+api.log
+streamlit.log
+results/example_test_set.csv
+test/example_test_set.csv

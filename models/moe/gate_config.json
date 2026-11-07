@@ -1,0 +1,24 @@
+{
+  "short_max_words": 150,
+  "long_max_words": 400,
+  "gate": "word_count",
+  "type_features": [
+    "log_words",
+    "sentences",
+    "mean_sentence_length",
+    "ttr",
+    "hapax_ratio",
+    "avg_word_length",
+    "contraction_rate",
+    "informal_rate",
+    "first_person_rate",
+    "second_person_rate",
+    "question_rate",
+    "exclamation_rate",
+    "capital_ratio",
+    "flesch_reading_ease",
+    "flesch_kincaid_grade",
+    "burstiness"
+  ],
+  "type_accuracy_val": 0.8053333333333333
+}

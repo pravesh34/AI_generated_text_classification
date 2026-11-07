@@ -1,0 +1,141 @@
+{
+  "experts": [
+    {
+      "expert": "short",
+      "n_train": 16000,
+      "n_val": 4000,
+      "accuracy": 0.97,
+      "precision": 0.9685942173479561,
+      "recall": 0.9715,
+      "f1": 0.9700449326010984,
+      "roc_auc": 0.9960122499999999,
+      "cm_tn": 1937,
+      "cm_fp": 63,
+      "cm_fn": 57,
+      "cm_tp": 1943
+    },
+    {
+      "expert": "long",
+      "n_train": 13491,
+      "n_val": 3373,
+      "accuracy": 0.9819152090127483,
+      "precision": 0.9769610532089962,
+      "recall": 0.9894444444444445,
+      "f1": 0.9831631244824731,
+      "roc_auc": 0.9982425655152929,
+      "cm_tn": 1531,
+      "cm_fp": 42,
+      "cm_fn": 19,
+      "cm_tp": 1781
+    },
+    {
+      "expert": "verylong",
+      "n_train": 9137,
+      "n_val": 2285,
+      "accuracy": 0.9842450765864332,
+      "precision": 0.9939759036144579,
+      "recall": 0.9705882352941176,
+      "f1": 0.9821428571428571,
+      "roc_auc": 0.995541346973572,
+      "cm_tn": 1259,
+      "cm_fp": 6,
+      "cm_fn": 30,
+      "cm_tp": 990
+    }
+  ],
+  "routed": [
+    {
+      "test_condition": "full",
+      "accuracy": 0.9896,
+      "precision": 0.9929039301310044,
+      "recall": 0.9790096878363832,
+      "f1": 0.9859078590785908,
+      "roc_auc": 0.9989569765234927
+    },
+    {
+      "test_condition": "first_25_words",
+      "accuracy": 0.8606,
+      "precision": 0.925898752751284,
+      "recall": 0.6792249730893434,
+      "f1": 0.783607575287178,
+      "roc_auc": 0.947331339900607
+    },
+    {
+      "test_condition": "first_50_words",
+      "accuracy": 0.9312,
+      "precision": 0.9315849486887116,
+      "recall": 0.8794402583423035,
+      "f1": 0.9047619047619048,
+      "roc_auc": 0.9796116232110664
+    },
+    {
+      "test_condition": "first_100_words",
+      "accuracy": 0.952,
+      "precision": 0.9140225179119754,
+      "recall": 0.961248654467169,
+      "f1": 0.9370409233997902,
+      "roc_auc": 0.9915955158726624
+    },
+    {
+      "test_condition": "first_150_words",
+      "accuracy": 0.9558,
+      "precision": 0.9102756892230577,
+      "recall": 0.9773950484391819,
+      "f1": 0.9426420970672204,
+      "roc_auc": 0.9946353409037185
+    },
+    {
+      "test_condition": "first_200_words",
+      "accuracy": 0.9762,
+      "precision": 0.9662198391420912,
+      "recall": 0.9698600645855759,
+      "f1": 0.9680365296803652,
+      "roc_auc": 0.9968896008726522
+    },
+    {
+      "test_condition": "first_1_sent",
+      "accuracy": 0.8164,
+      "precision": 0.9065743944636678,
+      "recall": 0.5640473627556513,
+      "f1": 0.6954213669542136,
+      "roc_auc": 0.9137964821211146
+    },
+    {
+      "test_condition": "first_2_sent",
+      "accuracy": 0.9056,
+      "precision": 0.9288366336633663,
+      "recall": 0.8078579117330463,
+      "f1": 0.8641335636154289,
+      "roc_auc": 0.9634830440594767
+    },
+    {
+      "test_condition": "first_3_sent",
+      "accuracy": 0.9336,
+      "precision": 0.9253065774804905,
+      "recall": 0.8934337997847147,
+      "f1": 0.9090909090909091,
+      "roc_auc": 0.9797973084547081
+    },
+    {
+      "test_condition": "hc3_holdout",
+      "accuracy": 0.9852334598251113,
+      "precision": 0.9622443628736235,
+      "recall": 0.99055330634278,
+      "f1": 0.9761936427716452,
+      "roc_auc": 0.998966329469134
+    },
+    {
+      "test_condition": "modern_holdout",
+      "accuracy": 0.957037037037037,
+      "precision": 0.9832427536231884,
+      "recall": 0.9648888888888889,
+      "f1": 0.9739793629430238,
+      "roc_auc": 0.9890646913580248
+    }
+  ],
+  "type_gate_accuracy": 0.8053333333333333,
+  "gate": {
+    "short_max_words": 150,
+    "long_max_words": 400
+  }
+}

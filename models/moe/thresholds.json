@@ -1,0 +1,7 @@
+{
+  "note": "Fitted on calib half (2500) maximizing F1 per length; thresholds per length: 25w->0.32, 50w->0.40, 100w->0.56, 150w->0.64. Linear approx th=0.28+0.0024*n clamped [0.32,0.64] for short bucket. Long/verylong kept at 0.50 (calibration did not generalize).",
+  "short_formula": {"intercept": 0.28, "slope": 0.0024, "low": 0.32, "high": 0.64},
+  "long": 0.5,
+  "verylong": 0.5,
+  "calib_points": {"25": 0.32, "50": 0.40, "100": 0.56, "150": 0.64}
+}

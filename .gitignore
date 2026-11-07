@@ -27,12 +27,21 @@ test.csv
 data/raw/
 !data/sample_*.csv
 
+# MoE datasets (reproducible via Hub: moe/download_small_text.py)
+# Keep local only — 126 MB total.
+data/moe/*.csv
+
 # Model weights & large binaries
 models/*.pt
 models/*.bin
 models/*.safetensors
 models/*.pkl
 models/*.joblib
+models/**/*.pkl
+models/**/*.joblib
+
+# Report backups (merged PDF is canonical)
+*.pre-moe.pdf
 
 # Logs and run files
 *.log

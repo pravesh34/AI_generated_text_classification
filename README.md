@@ -25,9 +25,10 @@ Code is in `moe/` (`download_small_text.py`, `train_moe.py`, `calibrate_threshol
 
 ```text
 ├── data/
+│   ├── README.md                           # Drive links for large data (this repo links, doesn't host)
 │   ├── sample_train.csv / sample_test.csv  # small tracked samples
-│   ├── train.csv / test.csv                # 623MB/212MB, gitignored (large)
-│   └── moe/                                # gitignored downloads (126MB): hc3_small.csv, modern_essays.csv
+│   ├── train.csv / test.csv                # 623MB/212MB, gitignored → Drive (see data/README.md)
+│   └── moe/                                # gitignored downloads (126MB) → HC3/modern script or Drive
 ├── notebooks/
 │   ├── 01_eda_and_data_exploration.ipynb
 │   ├── 02_stylometric_and_linguistic_features.ipynb
@@ -49,8 +50,8 @@ Code is in `moe/` (`download_small_text.py`, `train_moe.py`, `calibrate_threshol
 │   ├── make_moe_appendix.py    # figures + merged report appendix
 │   └── README.md
 ├── models/
-│   ├── *.pkl                 # baseline TF-IDF + LR/SVM (tracked legacy, 3.6MB)
-│   └── moe/                  # thresholds.json + gate_config.json (tracked); *.pkl gitignored (reproducible)
+│   ├── *.pkl                 # baseline TF-IDF + LR/SVM (tracked, ~3.9MB)
+│   └── moe/*.pkl             # 3 MoE experts + type gate (tracked, ~5.1MB) — repo runs without retraining
 ├── results/
 │   ├── baseline_ml_metrics.csv
 │   ├── moe_expert/routed/baseline_comparison/calibrated_metrics.csv + summary.json
@@ -68,7 +69,7 @@ Code is in `moe/` (`download_small_text.py`, `train_moe.py`, `calibrate_threshol
 └── README.md
 ```
 
-> Large files stay out of Git on purpose (see `.gitignore`): `data/train.csv`, `data/test.csv`, `data/moe/*.csv`, `models/**/*.pkl`, `*.pre-moe.pdf`. Small configs (`thresholds.json`, `*.csv` metrics, figures, PDFs) are tracked. Reproduce big data/models via the `moe/` scripts below.
+> **Data ≠ Git. Models = Git.** Large CSVs stay out of Git (see `.gitignore`) and live on **Google Drive** — links catalogued in [`data/README.md`](data/README.md) (add your Drive URLs there). Models (baseline + MoE `.pkl`, ~9 MB) **are** tracked so the repo runs without retraining. Reproduce `data/moe/` via `moe/download_small_text.py`; `data/train.csv`/`test.csv` via Drive.
 
 ---
 
@@ -114,11 +115,14 @@ streamlit run app/app.py
 
 ## 5. Reproducing the MoE Upgrade
 
+Data lives in **Google Drive** (links in `data/README.md`), not in Git. Models are tracked in Git.
+
 ```bash
 # 1. Download small-text datasets → data/moe/hc3_small.csv, modern_essays.csv (126MB, gitignored)
 PYTHONPATH=. python3 moe/download_small_text.py
+# (or download the Drive zip from data/README.md)
 
-# 2. Train 3 experts + type gate → models/moe/ (~130s)
+# 2. Train 3 experts + type gate → models/moe/ (~130s). Models ARE pushed to GitHub.
 PYTHONPATH=. python3 moe/train_moe.py
 
 # 3. Calibrate short-expert thresholds → models/moe/thresholds.json

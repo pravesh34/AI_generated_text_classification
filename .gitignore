@@ -32,13 +32,14 @@ data/raw/
 data/moe/*.csv
 
 # Model weights & large binaries
+# NOTE: baseline top-level pkls are legacy-tracked; MoE models ARE tracked
+# (models/moe/*.pkl, ~5 MB) so the repo runs without retraining.
+# The '*' patterns below only match the top level, NOT models/moe/ subdir.
 models/*.pt
 models/*.bin
 models/*.safetensors
 models/*.pkl
 models/*.joblib
-models/**/*.pkl
-models/**/*.joblib
 
 # Report backups (merged PDF is canonical)
 *.pre-moe.pdf

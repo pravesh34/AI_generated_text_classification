@@ -1,150 +1,253 @@
 <!--
   Classification of Human-Written and AI-Generated Text — NIT Sikkim
-  Live demo: streamlit run app/app.py  ·  Reports: reports/
+  Live: https://pravesh34.github.io/AI_generated_text_classification/
+  API:  https://moe-text-classifier-pravesh12.vercel.app
 -->
+
 <div align="center">
 
 # 🔎 Classification of Human-Written and AI-Generated Text
 
-### NIT Sikkim · Department of Computer Science & Engineering
+### A length-gated Mixture-of-Experts classifier
 
-**Pravesh Gedon Sharma (B240019) · Ankit Rawat (B320032)** · Course Project 2026
+**NIT Sikkim · Department of Computer Science & Engineering**
+Pravesh Gedon Sharma (B240019) · Ankit Rawat (B320032) · Course Project 2026
 
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab.svg)](https://python.org) [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3%2B-orange.svg)](https://scikit-learn.org) [![Streamlit](https://img.shields.io/badge/Streamlit-demo-FF4B4B.svg)](app/app.py) [![MoE](https://img.shields.io/badge/MoE-3%20experts-2563eb.svg)](#-moe-architecture) [![Accuracy 86.1% @25w](https://img.shields.io/badge/25w-86.1%25-vs-67.4%25-brightgreen.svg)](#-headline-results)
+[![Live site](https://img.shields.io/badge/live%20site-GitHub%20Pages-2ea44f?logo=github)](https://pravesh34.github.io/AI_generated_text_classification/) [![Live API](https://img.shields.io/badge/live%20API-Vercel-000000?logo=vercel)](https://moe-text-classifier-pravesh12.vercel.app) [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab?logo=python&logoColor=white)](https://python.org) [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.9-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org) [![Streamlit](https://img.shields.io/badge/demo-Streamlit-FF4B4B?logo=streamlit&logoColor=white)](app/app.py)
 
-**Live site (GitHub Pages):** https://pravesh34.github.io/AI_generated_text_classification/ · **API (Vercel):** https://moe-text-classifier-pravesh12.vercel.app · **Streamlit demo:** `streamlit run app/app.py` · **Reports:** [`reports/`](reports/README.md)
+**Detecting AI-generated text is easy on full essays — and hard where it matters: short inputs.**
 
-> A Mixture-of-Experts classifier that fixes the single model's short-text collapse —
-> **67.4% → 86.1% @ 25 words** and **48.6% → 98.5% on unseen chat**, while keeping full-text accuracy at ~99%.
+Our Mixture-of-Experts router takes the same baseline that collapses on short text and lifts it
+from **67.4% → 86.1% at 25 words** and **48.6% → 98.5% on unseen chat**, while holding **98.96%** on full essays.
 
 </div>
+
+<a href="https://pravesh34.github.io/AI_generated_text_classification/#live">
+  <img src="docs/assets/live-inference.png" alt="Live inference interface — paste text, get label, confidence, routed expert, text type, and threshold" width="100%">
+</a>
+
+<p align="center"><sub>Live inference on the project site — the model runs server-side from the tracked <code>.pkl</code> artifacts.</sub></p>
 
 ---
 
 ## 📑 Contents
 
-- [Overview](#-overview)
-- [Headline results](#-headline-results)
-- [MoE architecture](#-moe-architecture)
-- [Try it](#-try-it-5-minutes)
+- [Why this project](#-why-this-project)
+- [Results](#-results)
+- [Architecture](#-architecture)
+- [Live demo & API](#-live-demo--api)
+- [Quickstart](#-quickstart)
+- [Reproduce the MoE upgrade](#-reproduce-the-moe-upgrade)
 - [Reports & papers](#-reports--papers)
-- [Reproduce (MoE)](#-reproduce-the-moe-upgrade)
 - [Project structure](#-project-structure)
 - [Data & models](#-data--models)
+- [Limitations](#-limitations)
 
 ---
 
-## ✨ Overview
+## 💡 Why this project
 
-With LLMs everywhere, telling human-written from AI-generated text matters for academic integrity and NLP.
+Most detectors report a single accuracy on long essays. Real usage looks different: a chat reply, a
+short answer, the first paragraph of a submission. On those inputs, a global model trained on
+400-word essays has almost no signal — and it systematically labels human writing as AI.
 
-| Phase | What we did |
+We measured the cliff, then fixed it:
+
+| Phase | Contribution |
 |---|---|
-| **1 — Traditional ML + stylometrics** | Lexical diversity (TTR, hapax), burstiness, punctuation, readability (Flesch, Fog), word/char n-gram TF-IDF + Sentence-BERT. Classifiers: Logistic Regression, Linear SVM, Random Forest |
-| **2 — Fine-tuned transformers** | DistilBERT / RoBERTa with chunking for long documents (notebooks 05) |
-| **3 — Evaluation & ablation** | Accuracy, Precision, Recall, F1, ROC-AUC, confusion matrices, feature-family ablation |
+| **1 · Classical ML** | 24 stylometric features (TTR, hapax ratio, burstiness, readability, punctuation), word + char TF-IDF, Sentence-BERT; Logistic Regression, Linear SVM, Random Forest |
+| **2 · Transformers** | DistilBERT / RoBERTa fine-tuning with chunking for long documents |
+| **3 · Evaluation** | Accuracy, precision, recall, F1, ROC-AUC, confusion matrices, feature-family ablation |
+| **4 · MoE upgrade** | Length-gated experts trained on short chat + modern-LLM essays + truncation augmentation, with a text-type gate and length-adaptive thresholds |
 
-**MoE upgrade (this repo):** a length-gated Mixture-of-Experts that fixes the baseline's short-text failure. A deterministic length gate routes to **short / long / verylong** TF-IDF+LR experts trained on HC3 short Q&A + modern-LLM essays + truncation augmentation; a type gate labels **chat / casual / essay**; thresholds adapt per length. Routed accuracy **86.1% @ 25w**, **98.96% full text**, **98.5% HC3 holdout** (vs 48.6% baseline). Code in `moe/`, artifacts in `models/moe/`, metrics in `results/moe_*.csv`.
+The result is not just a higher average — it is a model that stays usable at 25 words, where the
+baseline is close to a coin flip.
 
 ---
 
-## 📊 Headline results
+## 📊 Results
 
-5k held-out essays (`results/moe_routed_metrics.csv` vs `results/moe_baseline_comparison.csv`):
+<p align="center">
+  <img src="docs/figures/moe_accuracy_vs_length.png" alt="Accuracy vs input length: baseline vs MoE" width="85%">
+</p>
+
+**At a glance**
+
+| 98.96% | 86.06% | 98.52% | 80.5% |
+|:---:|:---:|:---:|:---:|
+| full essays | first 25 words | unseen HC3 chat | chat / casual / essay gate |
+
+### Headline comparison
+
+5k held-out essays. Source: [`results/moe_baseline_comparison.csv`](results/moe_baseline_comparison.csv),
+[`results/moe_routed_metrics.csv`](results/moe_routed_metrics.csv).
 
 | Condition | Baseline | MoE routed | Δ |
 |---|---:|---:|---:|
-| Full text | 99.26% | 98.96% | ≈ tie |
-| First 25 words | 67.42% | **86.06%** | **+18.6** |
+| Full text | **99.26%** | 98.96% | −0.3 |
+| First 200 words | 98.36% | 97.62% | −0.7 |
+| First 150 words | 97.40% | 95.58% | −1.8 |
+| First 100 words | 94.10% | 95.20% | **+1.1** |
 | First 50 words | 83.28% | **93.12%** | **+9.8** |
+| First 25 words | 67.42% | **86.06%** | **+18.6** |
+| First 3 sentences | — | 93.36% | — |
+| First 2 sentences | — | 90.56% | — |
 | First 1 sentence | 59.82% | **81.64%** | **+21.8** |
-| HC3 holdout (unseen chat) | 48.56% | **98.52%** | **+49.9** |
+| HC3 holdout (unseen chat domain) | 48.56% | **98.52%** | **+49.9** |
 | Modern holdout (GPT-4 / Claude) | 85.52% | **95.70%** | **+10.2** |
 
-Per-expert validation: short **97.0%** (F1 97.0%, AUC 0.996) · long **98.2%** · verylong **98.4%**. Type gate **80.5%** (chat/casual/essay). Figures with full explanations: **Figures tab in the demo app** → `results/figures/`.
+The MoE deliberately trades a fraction of a point on full essays (already near ceiling) for a
+large gain wherever the baseline actually fails.
+
+### Per-expert validation
+
+| Expert | Words | Val accuracy | F1 | ROC-AUC |
+|---|---|---:|---:|---:|
+| `short` | ≤ 150 | 97.00% | 0.970 | 0.996 |
+| `long` | 151–400 | 98.19% | 0.983 | 0.998 |
+| `verylong` | > 400 | 98.42% | 0.982 | 0.996 |
+
+Type gate (**chat / casual / essay**) accuracy: **80.5%**. Raw metrics:
+[`results/moe_summary.json`](results/moe_summary.json),
+[`results/moe_expert_metrics.csv`](results/moe_expert_metrics.csv).
 
 ---
 
-## 🧩 MoE architecture
+## 🧩 Architecture
 
 ```text
-                text
-                 |
-      length gate (word count, deterministic)
-        ├─ ≤150w  → expert_short   (HC3 + truncated essays)
-        ├─ 151-400 → expert_long   (HC3 long + modern long + base long)
-        └─ >400w  → expert_verylong (base >400w + modern >400w)
-                 |
-      each expert = Word TF-IDF (1,2) 15k + Char TF-IDF (3,5) 25k + LR(C=1.5)
-                 |
-      + type gate (LR over 16 stylometric feats → chat / casual / essay)
-      + length-adaptive threshold (short: 0.32→0.64) + short-text warning
+                          text
+                           │
+              length gate (word count, deterministic)
+              ├── ≤ 150 words  → expert_short    (HC3 chat + truncated essays)
+              ├── 151–400      → expert_long     (HC3 long + modern long + essays)
+              └── > 400        → expert_verylong (essays + modern long-form)
+                           │
+        each expert = Word TF-IDF (1–2 gram, 15k)
+                    + Char TF-IDF (3–5 gram, 25k)
+                    + Logistic Regression (C = 1.5)
+                           │
+        type gate (LR on 16 stylometric features) → chat / casual / essay
+        length-adaptive threshold (short: 0.32 → 0.64) + short-text warning
+                           │
+                    label + calibrated confidence
 ```
 
-| Source | n | Use |
-|---|---|---|
-| HC3 `reddit_eli5` + `open_qa` + `finance` | 80,811 answers (median 117w, 61% ≤150w) | SHORT (chat/casual) |
-| `artnitolog/llm-generated-texts` (GPT-4 Turbo/Omni, Claude 3 Opus, Llama3, Command R+) | 17,997 (median 510w, 68% >400w) | LONG/VERYLONG modern |
-| `data/train.csv` (20k balanced subsample) | 20,000 essays (~393w avg) | LONG/VERYLONG + truncation augmentation |
+<p align="center">
+  <img src="docs/figures/moe_architecture.png" alt="MoE architecture diagram" width="80%">
+</p>
 
-Details: [`moe/README.md`](moe/README.md)
+**Why it works**
+
+- **Domain match, not just model size.** HC3 supplies genuine short Q&A chat; truncation
+  augmentation teaches the short expert what the beginning of an essay looks like.
+- **A deterministic gate beats a learned one here.** Word count is cheap, stable, and matches the
+  accuracy cliff observed in the ablation (~100–150 words).
+- **Thresholds adapt to length.** Short text needs a lower decision threshold; long text does not.
+- **Honest uncertainty.** Inputs under 25 words return a warning instead of overconfident output.
+
+Implementation: [`moe/train_moe.py`](moe/train_moe.py) · [`moe/type_features.py`](moe/type_features.py) · [`moe/predict_moe.py`](moe/predict_moe.py) · [`moe/README.md`](moe/README.md)
 
 ---
 
-## 🚀 Try it — 5 minutes
+## 🌐 Live demo & API
+
+| | |
+|---|---|
+| **Website** | https://pravesh34.github.io/AI_generated_text_classification/ |
+| **API base** | https://moe-text-classifier-pravesh12.vercel.app |
+| **Streamlit (local)** | `streamlit run app/app.py` |
+
+The static site runs on GitHub Pages; inference is a Python serverless function on Vercel
+(`web/api/predict.py`) that loads the tracked `.pkl` artifacts and exposes CORS so the page can
+call it directly.
 
 ```bash
-# 1. environment (Python 3.10+)
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt "datasets>=2.16" huggingface_hub pyarrow reportlab pypdf seaborn
-
-# 2. interactive demo (MoE + baseline inference, reports, figures)
-streamlit run app/app.py
-
-# 3. CLI inference (routes by length, labels type, warns on short text)
-PYTHONPATH=. python3 moe/predict_moe.py "I think sports are great because they keep kids busy after school"
-# → {"label": "Human-Written", "prob_ai": 0.0054, "expert": "short", ...}
-
-# 4. batch / API / LangChain (optional)
-python3 test/predict.py --csv data/test.csv --model lr --sample 5000 --out test/results
-python3 test/api.py    # FastAPI :8001  →  /docs
+curl -X POST "https://moe-text-classifier-pravesh12.vercel.app/api/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"I think sports are great because they keep kids busy after school"}'
 ```
 
-Models are tracked in Git (~9 MB) — **no retraining needed to run inference**. Notebooks: `jupyter notebook` → `notebooks/01`…`06` in order.
+```json
+{
+  "label": "Human-Written",
+  "prob_ai": 0.0054,
+  "prob_human": 0.9946,
+  "confidence": 0.9946,
+  "threshold_used": 0.32,
+  "expert": "short",
+  "words": 12,
+  "text_type": "casual",
+  "type_confidence": 0.981,
+  "warning": "WARNING: <25 words - very low signal, treat as uncertain."
+}
+```
+
+`GET /api/predict` returns a health check. Deployment notes: [`web/README.md`](web/README.md).
 
 ---
 
-## 📄 Reports & papers
+## 🚀 Quickstart
 
-All documents in [`reports/`](reports/README.md) (originals also in repo root):
+```bash
+git clone https://github.com/pravesh34/AI_generated_text_classification.git
+cd AI_generated_text_classification
 
-| File | About |
-|---|---|
-| `report.pdf` (= `Project_Report_AI_Text_Classification.pdf`) | NIT Sikkim project report, 12 pages: baseline + MoE appendix |
-| `Research_Paper_MoE_AI_Text_Detection.pdf` | 7-page paper: baseline vs MoE, ablation, cross-domain |
-| `DeepSeek_Style_Research_Paper_MoE.pdf` | 9-page detailed paper: formal method (§4), per-length ablation, calibration |
-| `Project_Report_MoE_Appendix.pdf` | Standalone 6-page MoE appendix |
-| `Code_Workflow_and_Run_Guide.pdf` | Setup → train → test → API → UI |
-| `VIDEO_SCRIPT_MoE_20min.md` | 20-minute narrated talk script |
+python3 -m venv venv && source venv/bin/activate
+pip install numpy scipy scikit-learn==1.9.1 joblib pandas streamlit
+```
+
+The models are tracked in Git (~10 MB), so **inference works immediately — no retraining**.
+
+**Interactive demo** — MoE + baseline, live result card, figures, and reports:
+
+```bash
+streamlit run app/app.py
+```
+
+**CLI** — routes by length, labels text type, warns on short input:
+
+```bash
+PYTHONPATH=. python3 moe/predict_moe.py \
+  "I think sports are great because they keep kids busy after school"
+# → {"label": "Human-Written", "prob_ai": 0.0054, "expert": "short", ...}
+```
+
+**Python**:
+
+```python
+from moe.predict_moe import predict
+
+print(predict("In today's rapidly evolving digital landscape, ..."))
+```
+
+**Full toolchain** (notebooks, FastAPI, LangChain tool, batch evaluation):
+
+```bash
+pip install -r requirements.txt "datasets>=2.16" huggingface_hub pyarrow reportlab pypdf seaborn
+jupyter notebook          # notebooks/01 → 06, in order
+python3 test/api.py       # FastAPI on :8001 → interactive docs at /docs
+python3 test/predict.py --csv data/test.csv --model lr --sample 5000 --out test/results
+```
 
 ---
 
 ## 🔁 Reproduce the MoE upgrade
 
-Data lives in **Google Drive** (links in `data/README.md`), not in Git. Models **are** in Git.
+The short-text datasets download automatically from Hugging Face. The large essay corpus stays
+local (gitignored) — see [`data/README.md`](data/README.md).
 
 ```bash
-# 1. small-text datasets → data/moe/ (126 MB, gitignored)
+# 1. short-text data → data/moe/ (HC3 + modern LLM essays, ~126 MB)
 PYTHONPATH=. python3 moe/download_small_text.py
 
-# 2. train 3 experts + type gate → models/moe/ (~130s)
+# 2. train 3 experts + type gate → models/moe/ (~2 minutes on a laptop)
 PYTHONPATH=. python3 moe/train_moe.py
 
-# 3. calibrate thresholds → models/moe/thresholds.json
+# 3. calibrate length-adaptive thresholds → models/moe/thresholds.json
 PYTHONPATH=. python3 moe/calibrate_thresholds.py
 
-# 4. rebuild figures + papers
+# 4. regenerate figures and papers
 PYTHONPATH=. python3 moe/make_moe_appendix.py
 PYTHONPATH=. python3 make_research_paper.py
 PYTHONPATH=. python3 make_deepseek_paper.py
@@ -153,41 +256,73 @@ cp *.pdf reports/
 
 ---
 
-## 🗂 Project structure
+## 📄 Reports & papers
 
-```text
-├── app/app.py                 # Streamlit conference demo (MoE + baseline, reports, figures)
-├── moe/                       # MoE upgrade: download / type_features / train / calibrate / predict
-├── src/                       # preprocessing, stylometrics, semantic, evaluate
-├── notebooks/                 # 01 EDA → 06 evaluation (Jupyter)
-├── models/*.pkl + models/moe/ # baseline TF-IDF+LR/SVM + 3 MoE experts + type gate (~9 MB, tracked)
-├── results/                   # moe_*.csv + summary.json + figures/
-├── reports/                   # all PDFs + VIDEO_SCRIPT + reports/README.md index
-├── data/                      # large CSVs (gitignored → Drive) + tracked samples
-├── test/                      # inference.py, predict.py, api.py, terminal_demo, LangChain tool
-├── report.pdf  Research_Paper*.pdf  DeepSeek*.pdf  Project_Report_MoE_Appendix.pdf
-├── requirements.txt  train_baseline.py  run_all.sh
-└── README.md
-```
+Everything lives in [`reports/`](reports/README.md).
 
-> **Data ≠ Git. Models = Git.** Large CSVs stay out of Git (see `.gitignore`) and live on Google Drive — catalogued in [`data/README.md`](data/README.md). Models (baseline + MoE `.pkl`) **are** tracked so the repo runs without retraining.
+| Document | What it covers |
+|---|---|
+| [`report.pdf`](reports/report.pdf) | Main project report (12 pages): baseline + MoE appendix |
+| [`Research_Paper_MoE_AI_Text_Detection.pdf`](reports/Research_Paper_MoE_AI_Text_Detection.pdf) | 7-page paper: baseline vs MoE, short-text ablation, cross-domain results |
+| [`DeepSeek_Style_Research_Paper_MoE.pdf`](reports/DeepSeek_Style_Research_Paper_MoE.pdf) | 9-page deep dive: formal method, per-length ablation, calibration |
+| [`Project_Report_MoE_Appendix.pdf`](reports/Project_Report_MoE_Appendix.pdf) | Standalone 6-page MoE appendix |
+| [`Code_Workflow_and_Run_Guide.pdf`](reports/Code_Workflow_and_Run_Guide.pdf) | Setup → train → test → API → UI |
+| [`VIDEO_SCRIPT_MoE_20min.md`](reports/VIDEO_SCRIPT_MoE_20min.md) | 20-minute narrated walkthrough with visual cues |
 
 ---
 
-## 🔗 Data & models
+## 🗂 Project structure
 
-- Training / test CSVs: `data/train.csv` (290k) / `data/test.csv` (97k) — via Drive (`data/README.md`). Small tracked samples: `data/sample_train.csv` / `sample_test.csv`.
-- MoE data: `moe/download_small_text.py` → `data/moe/hc3_small.csv`, `modern_essays.csv` or Drive zip in `data/README.md`.
-- Baseline artifacts: `models/word_tfidf_vectorizer.pkl`, `char_tfidf_vectorizer.pkl`, `logistic_regression_baseline.pkl`, `linear_svm_baseline.pkl`.
-- MoE artifacts: `models/moe/expert_{short,long,verylong}.pkl`, `type_gate.pkl`, `thresholds.json`, `gate_config.json`.
-- Metrics: `results/baseline_ml_metrics.csv`, `results/moe_expert/routed/baseline_comparison/calibrated_metrics.csv`, `results/moe_summary.json`.
+```text
+├── app/app.py                  # Streamlit demo: live inference, figures, reports
+├── moe/                        # MoE upgrade: download, features, train, calibrate, predict
+├── src/                        # preprocessing, stylometrics, semantic features, evaluation
+├── notebooks/                  # 01 EDA → 06 evaluation (Jupyter)
+├── models/                     # baseline TF-IDF + LR/SVM
+│   └── moe/                    # 3 experts + type gate + thresholds (~10 MB, tracked)
+├── results/                    # metrics CSVs, summary JSON, figures
+├── reports/                    # all PDFs + talk script + index
+├── web/                        # Vercel site + serverless inference API
+├── docs/                       # GitHub Pages build (site, figures, reports, assets)
+├── test/                       # inference, batch CLI, FastAPI, LangChain tool
+├── data/                       # large CSVs (local) + tracked samples + catalogue
+└── train_baseline.py · run_all.sh · requirements.txt
+```
+
+---
+
+## 🗃 Data & models
+
+| Source | Size | Used for |
+|---|---|---|
+| [Hello-SimpleAI/HC3](https://huggingface.co/datasets/Hello-SimpleAI/HC3) — `reddit_eli5`, `open_qa`, `finance` | 80,811 answers (median 117w) | short / chat / casual experts |
+| [artnitolog/llm-generated-texts](https://huggingface.co/datasets/artnitolog/llm-generated-texts) — GPT-4, Claude 3, Llama 3, Command R+ | 17,997 samples (median 510w) | long / verylong modern experts |
+| Original essay corpus (`train.csv` / `test.csv`) | 20k balanced subsample | long / verylong + truncation augmentation |
+
+- **Data ≠ Git.** Raw CSVs are large and gitignored; `moe/download_small_text.py` fetches the MoE
+  sets, and [`data/README.md`](data/README.md) documents the local essay corpus.
+- **Models = Git.** Baseline and MoE `.pkl` artifacts are tracked so the repo and the live API run
+  without retraining.
+- **Metrics:** [`results/`](results/) — baseline, per-expert, routed, calibrated, and comparison CSVs.
+
+---
+
+## ⚠️ Limitations
+
+- **Very short text is inherently uncertain.** At 25 words the MoE reaches 86.1% accuracy with high
+  precision but lower recall (0.679) — it is conservative rather than clairvoyant.
+- **Full-text accuracy is marginally lower** than the baseline (98.96% vs 99.26%); the trade is
+  intentional.
+- **Domain shift still matters.** Results on HC3 and modern-LLM holdouts are strong, but a new
+  genre can behave differently.
+- **Not proof of authorship.** Use this as evidence, not as a verdict — especially in academic or
+  disciplinary settings.
 
 ---
 
 <div align="center">
 
-*Built for academic discussion. Very short inputs (<25–50 words) are inherently uncertain — the MoE reports confidence and warnings.*
-
-**NIT Sikkim · CSE · 2026** — Sharma (B240019) & Rawat (B320032)
+*Built for academic discussion · NIT Sikkim · CSE · 2026*
+**Sharma (B240019) & Rawat (B320032)**
 
 </div>

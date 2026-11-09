@@ -12,7 +12,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776ab.svg)](https://python.org) [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3%2B-orange.svg)](https://scikit-learn.org) [![Streamlit](https://img.shields.io/badge/Streamlit-demo-FF4B4B.svg)](app/app.py) [![MoE](https://img.shields.io/badge/MoE-3%20experts-2563eb.svg)](#-moe-architecture) [![Accuracy 86.1% @25w](https://img.shields.io/badge/25w-86.1%25-vs-67.4%25-brightgreen.svg)](#-headline-results)
 
-**Live web (permanent):** https://moe-text-classifier-pravesh12.vercel.app · **Live API:** `POST /api/predict` · **Streamlit demo:** `streamlit run app/app.py` · **Reports:** [`reports/`](reports/README.md)
+**Live site (GitHub Pages):** https://pravesh34.github.io/AI_generated_text_classification/ · **API (Vercel):** https://moe-text-classifier-pravesh12.vercel.app · **Streamlit demo:** `streamlit run app/app.py` · **Reports:** [`reports/`](reports/README.md)
 
 > A Mixture-of-Experts classifier that fixes the single model's short-text collapse —
 > **67.4% → 86.1% @ 25 words** and **48.6% → 98.5% on unseen chat**, while keeping full-text accuracy at ~99%.

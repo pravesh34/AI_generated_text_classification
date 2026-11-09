@@ -181,8 +181,10 @@ go.onclick=async()=>{
   go.disabled=true; go.textContent='Classifying…';
   out.innerHTML='<p class="muted">Loading MoE experts…</p>';
   try{
-    const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
-    const j=await r.json();
+    const urls=['/api/predict','https://moe-text-classifier-pravesh12.vercel.app/api/predict'];
+    let r=null,j=null;
+    for(const u of urls){try{r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});j=await r.json();if(r.ok)break;}catch(e){r=null;}}
+    if(!r||!r.ok){out.innerHTML='<p class="muted">Live API unavailable on this preview. Run locally: <code>streamlit run app/app.py</code> or <code>PYTHONPATH=. python3 moe/predict_moe.py "your text"</code></p>';go.disabled=false;go.textContent='Classify →';return;}
     if(!r.ok) throw new Error(j.error||r.status);
     const pct=(j.prob_ai*100).toFixed(2);
     out.innerHTML=`<p class="reslabel">${j.label==='AI-Generated'?'🤖 AI-Generated':'🧑 Human-Written'}</p>

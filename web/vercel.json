@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "functions": {
+    "api/predict.py": {
+      "memory": 1024,
+      "maxDuration": 60,
+      "includeFiles": "api/models/**"
+    }
+  }
+}

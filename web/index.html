@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Human vs AI Text — MoE Classifier | NIT Sikkim</title>
+<meta name="description" content="Mixture-of-Experts classifier fixing short-text collapse in AI-text detection. 86.1% @25 words, 98.5% on unseen chat. NIT Sikkim CSE."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f172a;--blue:#2563eb;--sky:#0369a1;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--bg:#f8fafc}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+a{color:#1d4ed8;text-decoration:none}a:hover{text-decoration:underline}
+nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .in{max-width:1100px;margin:auto;display:flex;gap:1rem;align-items:center;padding:.7rem 1.2rem;flex-wrap:wrap}
+nav b{font-weight:800}nav .sp{flex:1}nav a{font-size:.9rem;font-weight:600;color:#334155}nav a.cta{background:var(--navy);color:#fff;padding:.5rem .9rem;border-radius:.7rem}
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#1e3a5f 55%,var(--sky) 100%);color:#f8fafc}
+.hero .in{max-width:1100px;margin:auto;padding:3.2rem 1.2rem 2.6rem}
+.badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#e0f2fe;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .7rem;border-radius:999px}
+.hero h1{font-size:2.4rem;line-height:1.08;margin:.8rem 0 .6rem;letter-spacing:-.02em}
+.hero p{color:#cbd5e1;max-width:46rem}
+.stats{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.4rem}
+.stat{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:1rem;padding:.8rem 1.1rem;min-width:8rem}
+.stat b{display:block;font-size:1.35rem;color:#fff}.stat span{font-size:.83rem;color:#cbd5e1}
+.btns{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.4rem}
+.btn{display:inline-block;padding:.8rem 1.2rem;border-radius:.8rem;font-weight:700;font-size:.95rem}
+.btn-w{background:#fff;color:var(--navy)}.btn-o{border:1px solid rgba(255,255,255,.35);color:#fff}
+.wrap{max-width:1100px;margin:auto;padding:2.2rem 1.2rem 3rem}
+.grid{display:grid;gap:1rem}.cols4{grid-template-columns:repeat(4,1fr)}.cols2{grid-template-columns:repeat(2,1fr)}.cols3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.cols4,.cols3,.cols2{grid-template-columns:1fr 1fr}.hero h1{font-size:1.9rem}}
+@media(max-width:560px){.cols4,.cols3,.cols2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:1rem;padding:1.2rem 1.3rem}
+.card h3{margin:0 0 .4rem}.card p{margin:.2rem 0;color:#334155;font-size:.93rem}
+.big{font-size:1.6rem;font-weight:800}.muted{color:var(--muted);font-size:.9rem}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:1rem;overflow:hidden}
+th,td{padding:.8rem 1rem;text-align:left;border-bottom:1px solid var(--line)}th{background:#f1f5f9;font-size:.82rem;letter-spacing:.04em;text-transform:uppercase;color:#475569}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:#0f172a;color:#e2e8f0;border-radius:1rem;padding:1.1rem 1.2rem;overflow:auto}
+pre code{background:none;padding:0}
+.fig{margin:0}.fig img{width:100%;border-radius:.8rem;border:1px solid var(--line);display:block}
+.fig figcaption{font-weight:700;font-size:.9rem;margin:.6rem 0 .2rem}.fig .d{font-size:.9rem;color:#334155}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+footer{background:var(--navy);color:#cbd5e1}.foot-in{max-width:1100px;margin:auto;padding:2rem 1.2rem}
+h2{letter-spacing:-.02em;margin:2.2rem 0 .8rem}
+.play textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:.8rem;padding:.9rem;font:inherit;resize:vertical}
+.play .row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.7rem;align-items:center}
+.play button{background:var(--navy);color:#fff;border:0;padding:.8rem 1.3rem;border-radius:.8rem;font-weight:800;cursor:pointer}
+.play button:disabled{opacity:.6;cursor:wait}
+.bar{height:.65rem;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:.5rem 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#0ea5e9)}
+.warn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e;border-radius:.7rem;padding:.5rem .8rem;font-size:.88rem;margin-top:.5rem}
+.reslabel{font-size:1.3rem;font-weight:800;margin:0}
+</style>
+</head>
+<body>
+<nav><div class="in">
+<b>🔎 MoE Text Classifier</b>
+<span class="sp"></span>
+<a href="#live">Live demo</a><a href="#results">Results</a><a href="#architecture">Architecture</a><a href="#figures">Figures</a><a href="#reports">Reports</a><a href="#run">Run</a>
+<a class="cta" href="https://github.com/pravesh34/AI_generated_text_classification" target="_blank" rel="noopener">GitHub</a>
+</div></nav>
+
+<header class="hero"><div class="in">
+<span class="badge">NIT Sikkim · CSE · Conference Demo</span>
+<h1>Human-Written vs AI-Generated Text</h1>
+<p>A Mixture-of-Experts classifier that fixes the single model’s short-text collapse — from <b>67.4% to 86.1% @ 25 words</b> and <b>48.6% to 98.5% on unseen chat</b>, while keeping full-text accuracy at ~99%.</p>
+<p><b>Pravesh Gedon Sharma (B240019) · Ankit Rawat (B320032)</b> — Department of Computer Science &amp; Engineering</p>
+<div class="stats">
+<div class="stat"><b>86.1%</b><span>@ 25 words</span></div>
+<div class="stat"><b>98.96%</b><span>full text</span></div>
+<div class="stat"><b>98.5%</b><span>HC3 holdout</span></div>
+<div class="stat"><b>3 experts</b><span>short / long / verylong</span></div>
+</div>
+<div class="btns"><a class="btn btn-w" href="#live">▶ Try live inference</a><a class="btn btn-o" href="#run">Run locally</a><a class="btn btn-o" href="#reports">↓ Download reports</a><a class="btn btn-o" href="#figures">See figures</a></div>
+</div></header>
+
+<main class="wrap">
+
+<section id="live">
+<h2>▶ Live inference</h2>
+<p class="muted">Runs on the Vercel serverless function (<code>/api/predict</code>) with the bundled <code>.pkl</code> models (also mirrored in the GitHub cloud). Paste any text — chat, short answer, or essay.</p>
+<div class="card play">
+<textarea id="txt" placeholder="Paste a passage, short answer, or chat message..."></textarea>
+<div class="row"><button id="go">Classify →</button><span class="muted" id="wc"></span></div>
+<div id="out" style="margin-top:.6rem"></div>
+</div>
+</section>
+<section id="results">
+<h2>📊 Headline results</h2>
+<p class="muted">5k held-out essays — same truncations evaluated for baseline and MoE routed.</p>
+<div style="overflow:auto;border-radius:1rem">
+<table>
+<tr><th>Condition</th><th>Baseline</th><th>MoE routed</th><th>Δ</th></tr>
+<tr><td>Full text</td><td>99.26%</td><td>98.96%</td><td>≈ tie</td></tr>
+<tr><td>First 25 words</td><td>67.42%</td><td><b>86.06%</b></td><td><b>+18.6</b></td></tr>
+<tr><td>First 50 words</td><td>83.28%</td><td><b>93.12%</b></td><td>+9.8</td></tr>
+<tr><td>First 1 sentence</td><td>59.82%</td><td><b>81.64%</b></td><td>+21.8</td></tr>
+<tr><td>HC3 holdout (unseen chat)</td><td>48.56%</td><td><b>98.52%</b></td><td><b>+49.9</b></td></tr>
+<tr><td>Modern holdout (GPT-4 / Claude)</td><td>85.52%</td><td><b>95.70%</b></td><td>+10.2</td></tr>
+</table></div>
+<div class="grid cols3" style="margin-top:1rem">
+<div class="card"><p class="pill">Short expert</p><p class="big">97.0%</p><p>Accuracy · F1 97.0% · AUC 0.996 (n=4,000 val)</p></div>
+<div class="card"><p class="pill">Long expert</p><p class="big">98.2%</p><p>Accuracy · F1 98.3% · AUC 0.998 (n=3,373)</p></div>
+<div class="card"><p class="pill">Verylong expert</p><p class="big">98.4%</p><p>Accuracy · F1 98.2% · AUC 0.996 (n=2,285)</p></div>
+</div>
+</section>
+
+<section id="architecture">
+<h2>🧩 Architecture</h2>
+<div class="grid cols3">
+<div class="card"><h3>Length gate (deterministic)</h3><p>≤150w → <b>short</b> · 151–400w → <b>long</b> · &gt;400w → <b>verylong</b>. Each expert: Word TF-IDF (1,2) 15k + Char TF-IDF (3,5) 25k → Logistic Regression (C=1.5).</p></div>
+<div class="card"><h3>Type gate (learned)</h3><p>LR over 16 stylometric features → <b>chat / casual / essay</b>. Accuracy <b>80.5%</b>. Used for interpretability &amp; warnings; routing is by length.</p></div>
+<div class="card"><h3>Thresholds &amp; warnings</h3><p>Short uses adaptive threshold <b>0.32 → 0.64</b> by length; long/verylong use 0.50. Inputs &lt;25w flagged <b>WARNING</b>, ≤50w <b>CAUTION</b>.</p></div>
+</div>
+<p style="margin-top:1rem"><b>Data:</b> HC3 short Q&amp;A (80.8k, median 117w) · Modern LLM essays (18k GPT-4/Claude/Llama3) · train.csv 20k + truncation augmentation (50/100/150w, 200/300w).</p>
+</section>
+
+<section id="figures">
+<h2>🖼 Figures</h2>
+<div class="grid cols2">
+<figure class="fig card"><img src="./figures/moe_architecture.png" alt="MoE architecture"><figcaption>Fig.1 — MoE architecture</figcaption><p class="d">Length gate → 3 TF-IDF+LR experts; type gate (80.5%) labels chat/casual/essay. Output: label + P(AI) + expert + type + warning.</p></figure>
+<figure class="fig card"><img src="./figures/moe_accuracy_vs_length.png" alt="Accuracy vs length"><figcaption>Fig.2 — Accuracy vs text length</figcaption><p class="d">MoE stays above baseline at every short length: 67.4% → <b>86.1% @25w</b>, 83.3% → 93.1% @50w. Curves merge after 150w; full-text both ~99%.</p></figure>
+<figure class="fig card"><img src="./figures/moe_cross_domain.png" alt="Cross domain"><figcaption>Fig.3 — Cross-domain generalization</figcaption><p class="d">Original essays tie (99.3% vs 99.0%). Unseen HC3 chat: 48.6% → <b>98.5%</b>. Modern holdout: 85.5% → <b>95.7%</b>.</p></figure>
+<figure class="fig card"><img src="./figures/moe_experts.png" alt="Per expert validation"><figcaption>Fig.4 — Per-expert validation</figcaption><p class="d">Short 97.0% / Long 98.19% / Verylong 98.42% accuracy; F1 and AUC all above 0.995. No weak specialist.</p></figure>
+<figure class="fig card"><img src="./figures/moe_pr_flip.png" alt="Precision recall flip"><figcaption>Fig.5 — Precision/Recall at 25 words</figcaption><p class="d">Baseline over-calls AI (P 0.53, R 0.99); MoE under-calls AI (P <b>0.93</b>, R 0.68) — higher accuracy (86.1% vs 67.4%) and F1 (0.78 vs 0.69), rarely falsely accusing humans.</p></figure>
+<figure class="fig card"><img src="./figures/moe_type_gate.png" alt="Type gate"><figcaption>Fig.6 — Type gate (80.5%)</figcaption><p class="d">Essay F1 0.91 (easiest), chat 0.79, casual 0.71 (overlaps both). 16 stylometric features.</p></figure>
+<figure class="fig card"><img src="./figures/model_comparison.png" alt="Model comparison"><figcaption>Fig.7 — Baseline model comparison</figcaption><p class="d">Accuracy: NB 95.55%, LR 99.25%, SVM <b>99.52%</b>. LR chosen for direct P(AI) without calibration.</p></figure>
+<figure class="fig card"><img src="./figures/confusion_matrices.png" alt="Confusion matrices"><figcaption>Fig.8 — Confusion matrices (5,000 held-out)</figcaption><p class="d">LR: 37 errors (FP 13, FN 24). SVM: 21 errors (FP 9, FN 12). Balanced; test is ~63% human.</p></figure>
+<figure class="fig card"><img src="./figures/roc_curves.png" alt="ROC curves"><figcaption>Fig.9 — ROC curves</figcaption><p class="d">AUC LR 0.9994 / SVM 0.9995 — near-perfect ranking on full text.</p></figure>
+<figure class="fig card"><img src="./figures/flow_train.png" alt="Training workflow"><figcaption>Fig.10 — Training workflow (33s)</figcaption><p class="d">Balanced 20k, stratified 16k/4k, NFKC+lowercase, 75k TF-IDF, LR/SVM, val + 5k held-out → save .pkl.</p></figure>
+</div>
+</section>
+
+<section id="reports">
+<h2>📄 Reports &amp; papers</h2>
+<div style="overflow:auto;border-radius:1rem">
+<table>
+<tr><th>Document</th><th>What it is</th><th>Download</th></tr>
+<tr><td><b>report.pdf</b></td><td>Main project report (12p: baseline + MoE appendix)</td><td><a href="./reports/report.pdf" target="_blank" rel="noopener">PDF ↓</a></td></tr>
+<tr><td><b>Research Paper</b></td><td>7p conference paper — baseline vs MoE, ablation, cross-domain</td><td><a href="./reports/Research_Paper_MoE_AI_Text_Detection.pdf" target="_blank" rel="noopener">PDF ↓</a></td></tr>
+<tr><td><b>Detailed Paper</b></td><td>9p — formal method, per-length ablation, calibration</td><td><a href="./reports/DeepSeek_Style_Research_Paper_MoE.pdf" target="_blank" rel="noopener">PDF ↓</a></td></tr>
+<tr><td><b>MoE Appendix</b></td><td>6p standalone appendix</td><td><a href="./reports/Project_Report_MoE_Appendix.pdf" target="_blank" rel="noopener">PDF ↓</a></td></tr>
+<tr><td><b>Run Guide</b></td><td>Code workflow — setup → train → test → API → UI</td><td><a href="./reports/Code_Workflow_and_Run_Guide.pdf" target="_blank" rel="noopener">PDF ↓</a></td></tr>
+</table></div>
+<p class="muted">All PDFs are also available in <code>reports/</code> in the <a href="https://github.com/pravesh34/AI_generated_text_classification" target="_blank" rel="noopener">GitHub repo</a>.</p>
+</section>
+
+<section id="run">
+<h2>🚀 Run the live demo</h2>
+<p>The interactive demo runs locally (Streamlit + Python models). Models are in Git — no retraining needed.</p>
+<pre><code># 1. environment
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt "datasets&gt;=2.16" huggingface_hub pyarrow reportlab pypdf seaborn
+
+# 2. interactive demo → http://localhost:8501
+streamlit run app/app.py
+
+# 3. CLI inference
+PYTHONPATH=. python3 moe/predict_moe.py "I think sports are great because they keep kids busy after school"
+# → {"label": "Human-Written", "prob_ai": 0.0054, "expert": "short", ...}</code></pre>
+<div class="grid cols3">
+<div class="card"><h3>Data</h3><p><code>data/train.csv</code> (290k) / <code>data/test.csv</code> (97k) via Drive — see repo <code>data/README.md</code>. Samples tracked in Git.</p></div>
+<div class="card"><h3>Models</h3><p><code>models/*.pkl</code> (~3.9MB) + <code>models/moe/</code> (~5.1MB) tracked. Inference runs without retraining.</p></div>
+<div class="card"><h3>Notebooks</h3><p><code>jupyter notebook</code> → <code>notebooks/01</code>…<code>06</code>: EDA → stylometrics → TF-IDF → semantic → transformers → evaluation.</p></div>
+</div>
+</section>
+</main>
+<footer><div class="foot-in">
+<b style="color:#fff">NIT Sikkim · CSE · 2026</b> — Sharma (B240019) &amp; Rawat (B320032)<br>
+<span style="font-size:.88rem">Built for academic discussion. Very short inputs (&lt;25–50 words) are inherently uncertain — MoE reports confidence and warnings. · <a href="https://github.com/pravesh34/AI_generated_text_classification" style="color:#7dd3fc">GitHub</a></span>
+</div></footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const txt=$('txt'), out=$('out'), go=$('go'), wc=$('wc');
+txt.addEventListener('input',()=>{const n=txt.value.trim()?txt.value.trim().split(/\s+/).length:0; wc.textContent=n? n+' words · '+txt.value.length+' chars':''});
+go.onclick=async()=>{
+  const text=txt.value.trim();
+  if(!text){out.innerHTML='<p class="muted">Please enter text.</p>';return;}
+  go.disabled=true; go.textContent='Classifying…';
+  out.innerHTML='<p class="muted">Loading MoE experts…</p>';
+  try{
+    const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||r.status);
+    const pct=(j.prob_ai*100).toFixed(2);
+    out.innerHTML=`<p class="reslabel">${j.label==='AI-Generated'?'🤖 AI-Generated':'🧑 Human-Written'}</p>
+      <p class="muted">confidence ${(j.confidence*100).toFixed(2)}% &middot; P(AI)=${j.prob_ai.toFixed(4)} &middot; P(Human)=${j.prob_human.toFixed(4)}</p>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <p><span class="pill">expert: ${j.expert}</span> <span class="pill">words: ${j.words}</span> <span class="pill">type: ${j.text_type} (${(j.type_confidence*100).toFixed(1)}%)</span> <span class="pill">threshold: ${j.threshold_used}</span></p>
+      ${j.warning?`<div class="warn">⚠️ ${j.warning}</div>`:''}
+      <pre>${JSON.stringify(j,null,2)}</pre>`;
+  }catch(e){
+    out.innerHTML='<p class="muted">Live API unavailable on this preview. Run locally: <code>streamlit run app/app.py</code> or <code>PYTHONPATH=. python3 moe/predict_moe.py "your text"</code></p>';
+  }finally{go.disabled=false; go.textContent='Classify →';}
+};
+</script>
+</body>
+</html>

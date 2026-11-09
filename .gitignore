@@ -43,6 +43,21 @@ models/*.joblib
 
 # Report backups (merged PDF is canonical)
 *.pre-moe.pdf
+!reports/*.pdf
+
+# MoE data zip (131 MB uncompressed CSVs) — local only, via Drive / moe/download_small_text.py
+data/ai_text_moe_data.zip
+
+# Vercel web deploy (web/)
+# .vercel = local tokens/state — never push
+web/.vercel/
+web/.venv/
+web/.python-version
+# Duplicated deploy copies (regenerate via cp, see web/README.md):
+web/api/models/
+web/api/figures/
+web/api/reports/
+web/api/index.html
 
 # Logs and run files
 *.log

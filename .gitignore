@@ -48,10 +48,14 @@ models/*.joblib
 !reports/Full_Report.pdf
 !docs/reports/Full_Report.pdf
 !web/reports/Full_Report.pdf
+# The consolidated academic report (rebuilt via final_report/build/build.py)
+!final_report/Final_Consolidated_Project_Report.pdf
 
 # PDF generator scripts — removed from Git, kept on this machine
 make_*.py
 moe/make_*.py
+# ...except the final_report build tooling, which is tracked
+!final_report/build/make_missing_figures.py
 
 # MoE data zip (131 MB uncompressed CSVs) — local only, via Drive / moe/download_small_text.py
 data/ai_text_moe_data.zip

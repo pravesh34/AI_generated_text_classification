@@ -185,7 +185,7 @@ Limits, quickly. Under 25 words is irreducible — signal is gone; MoE is 86%, n
 
 Future: DistilBERT/RoBERTa with chunking for verylong, per-type thresholds, adversarial paraphrase eval.
 
-Reproduce everything: `moe/download_small_text.py` → `moe/train_moe.py` → `moe/calibrate_thresholds.py` → `moe/predict_moe.py`. Metrics in `results/moe_*.csv`, figures in `results/figures/`, deep paper in `DeepSeek_Style_Research_Paper_MoE.pdf`.
+Reproduce everything: `moe/download_small_text.py` → `moe/train_moe.py` → `moe/calibrate_thresholds.py` → `moe/predict_moe.py`. Metrics in `results/moe_*.csv`, figures in `results/figures/`, deep paper in `reports/Full_Report.pdf` (Part III).
 
 Takeaway: if your detector assumes 300 words, it will lie to you on 25. Length is the task. Route it, train for it, calibrate it — and you keep the 99% without the 67% cliff. Thanks for watching.
 
